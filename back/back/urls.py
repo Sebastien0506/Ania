@@ -1,0 +1,42 @@
+"""
+URL configuration for app_ania_back project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.0/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+from django.contrib import admin
+from django.urls import path
+from app_ania_back.backend.views import discord_login, discord_callback, check_permission, on_message, me, sync_guild_channels, get_channels, get_message, sync_message, sync_roles, trigger_sync
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView
+)
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('auth/discord/login/', discord_login),
+    path('auth/discord/callback/', discord_callback),
+    path('api/check_permission/', check_permission),
+    path('api/on_message/', on_message),
+    path('api/me/', me),
+    path('api/sync_guild_channels/', sync_guild_channels),
+    path('api/get_channels/', get_channels),
+    path('api/get_message/<int:channel_id>', get_message),
+    path('api/sync_message/', sync_message),
+    path('api/sync_roles/', sync_roles),
+    path('api/trigger_sync/<str:channel_id>/', trigger_sync)
+]
