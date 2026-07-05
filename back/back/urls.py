@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app_ania_back.backend.views import discord_login, discord_callback, check_permission, on_message, me, sync_guild_channels, get_channels, get_message, sync_message, sync_roles, trigger_sync
+from back.back_ania.views import discord_login, discord_callback, check_permission, on_message, me, sync_guild_channels, get_channels, get_message, sync_message, sync_roles, trigger_sync
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
