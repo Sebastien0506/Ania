@@ -1,0 +1,60 @@
+:host {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .channel-container {
+    width: 800px;
+    height: 100%;          /* 👈 IMPORTANT */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .messages {
+    flex: 1;               /* 👈 prend tout l'espace dispo */
+    overflow-y: auto;
+    padding: 20px;
+    color: white;
+  }
+  
+  .message-input {
+    display: flex;
+    padding: 15px;
+    border-top: 1px solid #1e1f22;
+    background-color: #383a40;
+  }
+  
+  .message {
+    margin-bottom: 20px;
+  }
+  
+  .message-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .message p {
+    margin: 6px 0 0 0;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-box {
+    background: #2b2d31;
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+  }

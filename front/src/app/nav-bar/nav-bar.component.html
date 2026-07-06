@@ -1,0 +1,12 @@
+
+<div class="navbar">
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a class="nav-link active" *ngIf="!isLogged" href="/login">Connexion avec Discord</a>
+    </li>
+    <li class="nav-item" *ngFor="let channel of channels">
+      <a class="nav-link active" [routerLink]="['/channel', channel.channel_id]"> {{channel.name}} </a>
+    </li>
+    
+  </ul>
+</div>  
