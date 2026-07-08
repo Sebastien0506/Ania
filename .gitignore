@@ -1,6 +1,8 @@
 .venv/
+.env
 
 .vscode/
 
 __psycache__/
 *.pyc
+
