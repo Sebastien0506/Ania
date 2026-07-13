@@ -5,11 +5,13 @@ from rest_framework import exceptions
 class CookieJWTAuthentication(JWTAuthentication) :
     def authenticate(self, request):
         access_token = request.COOKIES.get("access_token")
-
+        
+        #On vérifie si le access_token est présent
         if not access_token:
             return None
         
         try :
+            #On vérifie si il est valide
             validated_token = self.get_validated_token(access_token)
         
         except Exception : 

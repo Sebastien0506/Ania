@@ -12,6 +12,10 @@ services:
   
   back:
     build: ./back
+    volumes:
+      - type: bind
+        source: ./back
+        target: /app
     ports:
       - "8000:8000"
     
@@ -20,5 +24,8 @@ services:
 
   front:
     build: ./front
+    volumes:
+      - ./front:/app
+      - /app/node_modules
     ports:
       - "4200:4200"
