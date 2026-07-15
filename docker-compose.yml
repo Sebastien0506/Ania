@@ -9,6 +9,15 @@ services:
       POSTGRES_DB: "app_bot"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
+  bot:
+    build: ./api_bot
+    volumes:
+      - type: bind
+        source: ./api_bot
+        target: /app_bot
+    ports:
+      - "8001:8001"
+
   
   back:
     build: ./back

@@ -18,6 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 from back.back_ania.authentication import CookieJWTAuthentication
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+
 load_dotenv()
 # Create your views here.
 CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
