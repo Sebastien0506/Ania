@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -11,6 +11,8 @@ export interface Channel {
   providedIn: 'root'
 })
 export class NavBarService {
+
+  isLogged = signal(false);
 
   constructor(private http: HttpClient) { }
 //On fait la requête pour récupérer les channels de l'utilisateur

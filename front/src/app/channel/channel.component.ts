@@ -27,6 +27,7 @@ export class ChannelComponent implements OnInit {
     private route: ActivatedRoute
   ) {}
 
+  //On reçoit les messages
   loadMessage() {
     this.channelService.getMessage(this.channelId).subscribe(data => {
       this.messages = data;
@@ -63,6 +64,7 @@ export class ChannelComponent implements OnInit {
   }
 
   messageText : string = '';
+
   validate_input(): boolean {
     this.showModal = false;
     //On vérifie si l'input est vide ou pas 
@@ -95,6 +97,7 @@ export class ChannelComponent implements OnInit {
 
   }
 
+  //On envoie le message à discord
   sendMessageDiscord(): void {
     const isValid = this.validate_input();
     

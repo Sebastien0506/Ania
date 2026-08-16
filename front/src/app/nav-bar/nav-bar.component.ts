@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
-
+import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { NavBarService, Channel } from './nav-bar.service';
 import { NgFor, NgIf } from '@angular/common';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { LoginComponent } from '../login/login.component';
+
 
 @Component({
   selector: 'app-nav-bar',
@@ -10,34 +13,42 @@ import { NgFor, NgIf } from '@angular/common';
   imports: [
     RouterLink,
     NgFor,
-    NgIf
+    NgIf,
+    MatButtonModule,
+    MatDialogModule,
+    
 ],
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.css'
 })
 export class NavBarComponent {
-  
-  // On initialise channel a un tableau vide et isLogged a false
+
+  private navBarService = inject(NavBarService); 
   channels: Channel[] = [];
-  isLogged = true;
-  
-  constructor(private navBarService: NavBarService) {}
-  
-  // Au chargement de la page on fait la requête
+
+  constructor(
+    private dialogRef: MatDialog
+  ) {}
+
+  isLogged = this.navBarService.isLogged;
+
+
   ngOnInit(): void {
     this.navBarService.getChannel().subscribe({
       next: (data) => {
         this.channels = data;
-        this.isLogged;
-        console.log("Channels récupéres:", data);
-        console.log("Channels:", this.channels);
+        this.navBarService.isLogged.set(true);
       },
-      error: (err) => {
-        console.log("Utilisateur non connecté");
-        this.isLogged = false;
+      error: () => {
+        this.navBarService.isLogged.set(false);
       }
     });
   }
-  
 
+  openDialog() {
+    this.dialogRef.open(LoginComponent, {
+      width: '700px',
+      height: '700px'
+    });
+  }
 }

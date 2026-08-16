@@ -15,6 +15,7 @@ export class LoginComponent {
   constructor(private loginService: LoginService) {}
   
 
+  //On envoie la requête pour se connecter avec discord
   sendRequest() {
      this.loginService.loginWithDiscord();
   }

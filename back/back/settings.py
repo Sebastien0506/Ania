@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 
 CORS_ALLOW_CREDENTIALS = True
 
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
 ]
@@ -47,6 +49,7 @@ CSRF_COOKIE_SAMESITE ="Lax"
 # Application definition
 
 INSTALLED_APPS = [
+    'back.core',
     'back.back_ania',
     'django.contrib.admin',
     'django.contrib.auth',

@@ -14,6 +14,7 @@ export interface User {
 export class LoginService {
   constructor(private http: HttpClient) { }
 
+  //On contact l'api de discord pour se connecter
   loginWithDiscord(): void {
     window.location.href = 'http://localhost:8000/auth/discord/login/';
   }

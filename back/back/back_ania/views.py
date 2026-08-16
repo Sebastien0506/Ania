@@ -2,6 +2,7 @@ import time
 from dotenv import load_dotenv
 from django.shortcuts import render, redirect
 import os
+import discord
 import urllib.parse
 from django.conf import settings
 import requests
@@ -18,7 +19,12 @@ from rest_framework.permissions import IsAuthenticated
 from back.back_ania.authentication import CookieJWTAuthentication
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-
+from back.core.check_connected_user import connected_user
+from back.core.services.bot_join_vocal_channel import connect_bot_voice_channel
+import asyncio
+from back.core.bot import bot
+from back.core.services.check_user_roles import get_user_roles
+from back.core.sync_guilds import sync_guilds
 load_dotenv()
 # Create your views here.
 CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
@@ -49,7 +55,9 @@ def get_token_for_user(user) :
     }
 
 def discord_callback(request):
+    print("=== CALLBACK DISCORD APPELÉ ===", flush=True)
     code = request.GET.get("code")
+    print("CODE :", code, flush=True)
 
     if not code:
         return JsonResponse({"error": "No code provided"}, status=400)
@@ -66,7 +74,8 @@ def discord_callback(request):
         },
         headers={"Content-Type": "application/x-www-form-urlencoded"}
     )
-
+    print("STATUS : ", token_response.status_code, flush=True)
+    
     if token_response.status_code != 200:
         return JsonResponse({"error": "Token exchange failed"}, status=400)
 
@@ -103,13 +112,7 @@ def discord_callback(request):
         }
     )
     
-    requests.post(
-        "http://localhost:8001/api/request_user_roles/",
-        json={
-            "guild_id": settings.BOT_GUILD_ID,
-            "user_id": user.discord_id
-        }
-    )
+    user_roles = get_user_roles(user.discord_id)
     # 4️⃣ Génération JWT
     tokens = get_token_for_user(user)
 
@@ -217,41 +220,49 @@ def on_message(request):
 
     return Response({"detail": "Message enregistré"})
 
+#Synchronisation des salon dans la db
+def sync_channels():
 
-@csrf_exempt
+    for discord_guild in bot.guilds: 
+
+        guild = Guild.objects.filter(
+            guild_id=discord_guild.id
+        ).first()
+
+        if not guild :
+            continue
+
+        #Pour chaque channel discord on récupère leur instance (channel textuel, vocal ou catégorie)
+        for discord_channel in discord_guild.channels:
+            if isinstance(discord_channel, discord.TextChannel):
+                channel_type = "text"
+            elif isinstance(discord_channel, discord.VoiceChannel):
+                channel_type = "voice"
+            
+            elif isinstance(discord_channel, discord.CategoryChannel):
+                channel_type = "category"
+            
+            else :
+                continue
+
+            Channel.objects.update_or_create(
+                channel_id=discord_channel.id,
+                defaults={
+                    "name": discord_channel.name,
+                    "channel_type": channel_type,
+                    "guild": guild,
+                }
+            )
 @api_view(["POST"])
-def sync_guild_channels(request):
+def trigger_sync_channels(request):
+    sync_channels()
 
-    guild_id = request.data.get("guild_id")
-    channels = request.data.get("channels")
-
-    if not guild_id or not channels:
-        return Response(
-            {"error": "Data manquante"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    # ✅ On crée la guild si elle n'existe pas
-    guild, created = Guild.objects.get_or_create(
-        guild_id=guild_id,
-        defaults={"name": "Unknown"}
+    return Response(
+        {
+            "success": "Salon synchronés"
+        },
+        status=status.HTTP_200_OK
     )
-
-    # 🧹 On supprime anciens channels
-    Channel.objects.filter(guild=guild).delete()
-
-    # 💾 On recrée les channels
-    for ch in channels:
-        Channel.objects.update_or_create(
-            channel_id=ch["id"],
-            defaults={
-                "guild": guild,
-                "name": ch["name"],
-                "channel_type": ch["type"]
-            }
-        )
-
-    return Response({"status": "Channels synchronisés"})
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -341,16 +352,18 @@ def get_message(request, channel_id):
 
     return Response(serializer.data)
 
+#Synchronisation des guilde dans la db
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def trigger_sync(request, channel_id) :
-    requests.post(
-        "http://localhost:8001/api/request_sync_channel/",
-        json={
-            "channel_id": channel_id
-        }
+def trigger_sync_guilds(request) :
+    sync_guilds()
+
+    return Response(
+        {
+            "success": "Guilds synchronisées."
+        },
+        status=status.HTTP_200_OK
     )
-    return Response({"status": "Sync déclenchée"})
 
 #On reçoit les rôles
 @csrf_exempt
@@ -372,5 +385,50 @@ def sync_roles(request):
 
     return Response({"status": "roles synced"})
 
-        
+ #Demande au bot de rejoindre le salon vocal       
+@api_view(["POST"])
+def join_bot(request):
+    #on récupère l'id discord de l'utilisateur
+    discord_id = request.data.get("discord_id")
 
+    #On vérifie que l'id discord est présent
+    if not discord_id :
+        return Response(
+            {
+                "error" : "L'identifiant discord n'est pas fournit."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    member = connected_user(discord_id)
+
+    if member is None :
+        return Response(
+            {
+                "error": "L'utilisateur n'est pas connecté à un salon vocal."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    future = asyncio.run_coroutine_threadsafe(
+        connect_bot_voice_channel(member),
+        bot.loop
+    )
+    try:
+        channel_name = future.result(timeout=10)
+    
+    except Exception as e :
+        print("Erreur connexion vocal :", e)
+
+        return Response(
+            {
+                "error" :str(e)
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    return Response(
+        {
+            "success": "Utilisateur connecté à un salon vocal."
+        },
+        status=status.HTTP_200_OK
+    )
