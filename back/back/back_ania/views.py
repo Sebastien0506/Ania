@@ -21,6 +21,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from back.core.check_connected_user import connected_user
 from back.core.services.bot_join_vocal_channel import connect_bot_voice_channel
+from back.core.get_message import get_channel_message
 import asyncio
 from back.core.bot import bot
 from back.core.services.check_user_roles import get_user_roles
@@ -337,20 +338,29 @@ def sync_message(request) :
 #PERMET DE RÉCUPÉRER LES MESSAGES
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_message(request, channel_id): 
+def get_message(request, channel_id) :
+    #On récupère le channel par son id
+    channel = Channel.objects.filter(channel_id=channel_id).first()
 
-    channel = Channel.objects.get(channel_id=channel_id)
-
-    if str(channel.guild.guild_id) != str(settings.BOT_GUILD_ID) :
-        return Response({"error" : "Accès refusé"}, status=status.HTTP_403_FORBIDDEN)
+    if not channel :
+        return Response(
+            {
+                "error": "Aucun channel trouvé."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
-    messages = DiscordMessage.objects.filter(
-        channel__channel_id=channel_id
-    ).order_by("discord_created_at")
+    future = asyncio.run_coroutine_threadsafe(
+        get_channel_message(channel),
+        bot.loop
+    )
+    messages = future.result()
 
-    serializer = DiscordMessageSerializer(messages, many=True)
+    return Response(
+        messages,
+        status=status.HTTP_200_OK
+    )
 
-    return Response(serializer.data)
 
 #Synchronisation des guilde dans la db
 @api_view(["POST"])

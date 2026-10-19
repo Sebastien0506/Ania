@@ -35,7 +35,7 @@ urlpatterns = [
     path('api/me/', me),
     path('api/trigger_sync_channels/', trigger_sync_channels),
     path('api/get_channels/', get_channels),
-    path('api/get_message/<int:channel_id>', get_message),
+    path('api/get_message/<int:channel_id>/', get_message),
     path('api/sync_message/', sync_message),
     path('api/sync_roles/', sync_roles),
     path('api/join_bot/', join_bot),
