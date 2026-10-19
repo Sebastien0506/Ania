@@ -14,7 +14,10 @@
         } @else {
           <button mat-button [matMenuTriggerFor]="userMenu">Menu</button>
           <mat-menu #userMenu="matMenu">
-            <button mat-menu-item>Le nom des salon textuel</button>
+            @for( channel of channels; track channel.channel_id){
+              <button mat-menu-item [routerLink]="['/channel', channel.channel_id]">{{channel.name}}</button>
+            }
+            
           </mat-menu>
         }
         

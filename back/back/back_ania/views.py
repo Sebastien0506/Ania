@@ -266,14 +266,14 @@ def trigger_sync_channels(request):
     )
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_channels(request):
 
     guild = Guild.objects.first()
 
     if not guild:
         return Response(
-            {"error": "Acune guild trouvée"}, status=status.HTTP_400_BAD_REQUEST
+            {"error": "Aucune guild trouvée"}, status=status.HTTP_400_BAD_REQUEST
         )
     
     channels = Channel.objects.filter(guild=guild)

@@ -39,6 +39,7 @@ export class NavBarComponent {
       next: (data) => {
         this.channels = data;
         this.navBarService.isLogged.set(true);
+        console.log("Channels:", this.channels);
       },
       error: () => {
         this.navBarService.isLogged.set(false);

@@ -45,10 +45,18 @@ CSRF_TRUSTED_ORIGINS = [
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE ="Lax"
 
+ASGI_APPLICATION = "back.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'back.core',
     'back.back_ania',
     'django.contrib.admin',
