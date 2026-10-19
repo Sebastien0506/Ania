@@ -7,11 +7,6 @@ services:
     ports:
       - "5432:5432"
     
-    networks:
-      shared_network:
-        aliases:
-          - app_database
-    
     environment:
       POSTGRES_DB: "app_bot"
       POSTGRES_USER: "postgres"
@@ -36,9 +31,6 @@ services:
     ports:
       - "8000:8000"
     
-    networks:
-      - shared_network
-    
     depends_on:
       db:
         condition: service_healthy
@@ -51,10 +43,19 @@ services:
     ports:
       - "4200:4200"
 
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    environment:
+      - NGINX_PORT=80
+    depends_on:
+      - back
+      - front
+
 volumes:
   postgres_data:
   front_node_modules:
 
-networks:
-  shared_network:
-    external: true
