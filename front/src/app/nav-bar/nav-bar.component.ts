@@ -5,6 +5,7 @@ import { NavBarService, Channel } from './nav-bar.service';
 import { NgFor, NgIf } from '@angular/common';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { LoginComponent } from '../login/login.component';
+import { MatMenuModule} from '@angular/material/menu'
 
 
 @Component({
@@ -16,7 +17,7 @@ import { LoginComponent } from '../login/login.component';
     NgIf,
     MatButtonModule,
     MatDialogModule,
-    
+    MatMenuModule
 ],
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.css'
