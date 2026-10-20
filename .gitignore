@@ -5,4 +5,5 @@
 
 __psycache__/
 *.pyc
+channel_id.txt
 

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ChannelServiceService, Message } from './channel-service.service';
 import { NgFor, DatePipe, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 
 
 @Component({
@@ -24,7 +25,8 @@ export class ChannelComponent implements OnInit {
 
   constructor(
     private channelService: ChannelServiceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
   ) {}
 
   //On reçoit les messages
@@ -39,25 +41,29 @@ export class ChannelComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const id = params.get("id");
+      console.log("id du channel:", id);
 
       if(!id) return;
 
-      this.channelId = id;
+      //On redirige vers le component messages
+      this.router.navigate(['/messages', id]);
 
-      //1) On charge ce qu'il y a déjà en db
-      this.loadMessage();
+      // this.channelId = id;
 
-      //2) On déclenche le sync historique UNE fois
-      this.channelService.syncChannel(this.channelId).subscribe();
+      // //1) On charge ce qu'il y a déjà en db
+      // this.loadMessage();
 
-      //3) WebSocket temps réel
-      const socket = new WebSocket(
-        `ws://localhost:8000/ws/channel/${this.channelId}/`
-      );
-      socket.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        this.messages.push(message);
-      };
+      // //2) On déclenche le sync historique UNE fois
+      // this.channelService.syncChannel(this.channelId).subscribe();
+
+      // //3) WebSocket temps réel
+      // const socket = new WebSocket(
+      //   `ws://localhost:8000/ws/channel/${this.channelId}/`
+      // );
+      // socket.onmessage = (event) => {
+      //   const message = JSON.parse(event.data);
+      //   this.messages.push(message);
+      // };
     });
     
     

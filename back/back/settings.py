@@ -28,7 +28,10 @@ SECRET_KEY = 'django-insecure-)j6m)-axug*_pztiy_w@4uz)7bz34rh+n%mo+x&zxpsv38^0x)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1"
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -36,10 +39,11 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+    "http://localhost:8080",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:4200",
+    "http://localhost:8080",
 ]
 
 SESSION_COOKIE_SAMESITE = "Lax"
@@ -57,6 +61,7 @@ CHANNEL_LAYERS = {
 
 INSTALLED_APPS = [
     'daphne',
+    'corsheaders',
     'back.core',
     'back.back_ania',
     'django.contrib.admin',

@@ -1,0 +1,32 @@
+<div class="pageMessage">
+    <div class="message">
+
+        <div class="message-list">
+            @for (message of allMessage; track message.id) {
+                <div class="message-item">
+                    <div class="message-author">
+                        {{ message.author }}
+                    </div>
+
+                    <div class="message-content">
+                        {{ message.content }}
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="form">
+            <form>
+                <mat-form-field subscriptSizing="dynamic">
+                    <mat-label>Écrire un message</mat-label>
+                    <input type="text" matInput>
+                    
+                </mat-form-field>
+                <button mat-raised-button type="submit">
+                    <mat-icon>send</mat-icon>
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>

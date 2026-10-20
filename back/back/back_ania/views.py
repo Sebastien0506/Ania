@@ -117,7 +117,7 @@ def discord_callback(request):
     # 4️⃣ Génération JWT
     tokens = get_token_for_user(user)
 
-    response = redirect("http://localhost:4200/auth/success")
+    response = redirect("http://localhost:8080/auth/success")
 
     response.set_cookie(
         key="access_token",
@@ -266,7 +266,7 @@ def trigger_sync_channels(request):
     )
 
 @api_view(["GET"])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_channels(request):
 
     guild = Guild.objects.first()
@@ -337,7 +337,7 @@ def sync_message(request) :
 
 #PERMET DE RÉCUPÉRER LES MESSAGES
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_message(request, channel_id) :
     #On récupère le channel par son id
     channel = Channel.objects.filter(channel_id=channel_id).first()
