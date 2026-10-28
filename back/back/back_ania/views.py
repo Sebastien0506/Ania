@@ -6,12 +6,13 @@ import discord
 import urllib.parse
 from django.conf import settings
 import requests
-from .models import User, Guild, GuildRolePermission, Channel, Message, DiscordMessage
+from .models import User, Guild, GuildRolePermission, Channel, DiscordMessage
 from django.http import JsonResponse
 from rest_framework.response import Response 
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from django.views.decorators.csrf import ensure_csrf_cookie
 from back.back_ania.serializer import MessageSerializer, ChannelSerializer, DiscordMessageSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import AuthenticationFailed, TokenError, InvalidToken
@@ -26,11 +27,17 @@ import asyncio
 from back.core.bot import bot
 from back.core.services.check_user_roles import get_user_roles
 from back.core.sync_guilds import sync_guilds
+from back.core.services.voice_message import voice_message
+from django.middleware.csrf import get_token
 load_dotenv()
 # Create your views here.
 CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI")
+
+@ensure_csrf_cookie
+def get_csrf(request) :
+    return JsonResponse({"token": get_token(request)})
 
 def discord_login(request) :
     params = {
@@ -183,43 +190,74 @@ def check_permission(request):
 def on_message(request):
 
     user = request.user
+    print(user, flush=True)
     content = request.data.get("message")
-    # channel_id = request.data.get("idChannel")
+    channel_id = request.data.get("channel_id")
 
-    # if not channel_id : 
-    #     return Response(
-    #         {"error": "Id du channel manquant."}, status=status.HTTP_400_BAD_REQUEST
-    #     )
+    # Vérifie que le message n'est pas vide
 
+    if not isinstance(content, str) or not content.strip():
 
-    if not content:
         return Response(
+
             {"error": "Message manquant"},
+
             status=status.HTTP_400_BAD_REQUEST
+
         )
-    user_discord_id = user.discord_id
+
+    content = content.strip()
+
+    # Enregistre le message dans la base de données
+
     serializer = MessageSerializer(data={"content": content})
 
     if not serializer.is_valid():
+
         return Response(serializer.errors, status=400)
 
-    serializer.save(user=user)
-    data = {
-        "message": content,
-        # "channel": channel_id,
-        "user_id": user_discord_id
-
-    }
-
-    url = "http://localhost:8001/voice_message/"
-
-    response = requests.post(url, json=data)
-    print("Status :", response.status_code)
-    print("Response :", response.text)
     
 
+    # Vérifie que le bot Discord est connecté
 
-    return Response({"detail": "Message enregistré"})
+    if not bot.is_ready():
+
+        return Response({
+
+            "detail": "Message enregistré, mais le bot Discord n'est pas prêt."
+
+        })
+
+    # Demande au bot de lire le message
+
+    future = asyncio.run_coroutine_threadsafe(
+
+        voice_message(
+            bot,
+            user.discord_id,
+            channel_id,
+            content
+        ),
+        bot.loop
+    )
+
+    # Affiche les éventuelles erreurs de la tâche
+
+    def on_done(f):
+
+        try:
+
+            f.result()
+
+        except Exception as e:
+
+            print(f"Erreur lors de la lecture audio : {e}")
+
+    future.add_done_callback(on_done)
+
+    return Response({
+        "detail": "Message enregistré et lecture audio demandée"
+    })
 
 #Synchronisation des salon dans la db
 def sync_channels():

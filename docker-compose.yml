@@ -28,8 +28,16 @@ services:
       - type: bind
         source: ./back
         target: /app
+    
+    command:
+      - watchfiles
+      - --filter
+      - python
+      - daphne -b 0.0.0.0 -p 8000 back.asgi:application
+      - /app
     ports:
       - "8000:8000"
+
     
     depends_on:
       db:
@@ -39,7 +47,7 @@ services:
     build: ./front
     volumes:
       - ./front:/app
-      - /app/node_modules
+      - front_node_modules:/app/node_modules
     ports:
       - "4200:4200"
 

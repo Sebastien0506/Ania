@@ -110,13 +110,7 @@ class GuildRolePermission(models.Model) :
     permissions = models.ManyToManyField(BotPermission)
     name = models.CharField(max_length=100, default="unknown")
 
-class Message(models.Model) :
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages")
 
-    def __str__(self):
-        return f"{self.user.username}: {self.content[:20]}"
     
 class DiscordMessage(models.Model) :
     message_id = models.BigIntegerField(unique=True)

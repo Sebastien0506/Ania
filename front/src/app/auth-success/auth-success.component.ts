@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../login/login.service';
 import { Router } from '@angular/router';
+import { AuthSuccessService } from './auth-success.service';
+
 
 @Component({
   selector: 'app-auth-success',
@@ -11,7 +13,7 @@ import { Router } from '@angular/router';
 })
 export class AuthSuccessComponent implements OnInit{
 
-  constructor( private loginService: LoginService, private router: Router) {}
+  constructor( private loginService: LoginService, private router: Router, private authSuccessService: AuthSuccessService) {}
 
   ngOnInit() {
     this.loginService.getUser().subscribe({
@@ -24,6 +26,14 @@ export class AuthSuccessComponent implements OnInit{
         this.router.navigate(['/login']);
       }
     });
+    this.authSuccessService.getCsrf().subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération du csrf.");
+      }
+    })
   }
 
 }

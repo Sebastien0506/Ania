@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from back.back_ania.views import discord_login, discord_callback, check_permission, on_message, me, trigger_sync_channels, get_channels, get_message, sync_message, sync_roles, trigger_sync_guilds, join_bot
+from back.back_ania.views import get_csrf, discord_login, discord_callback, check_permission, on_message, me, trigger_sync_channels, get_channels, get_message, sync_message, sync_roles, trigger_sync_guilds, join_bot
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -25,6 +25,7 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/get_csrf/', get_csrf),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),

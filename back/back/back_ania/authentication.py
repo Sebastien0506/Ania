@@ -5,7 +5,10 @@ from rest_framework.authentication import SessionAuthentication
 
 class CookieJWTAuthentication(JWTAuthentication) :
     def authenticate(self, request):
+        # print("Cookies reçus :", list(request.COOKIES.keys()), flush=True)
         access_token = request.COOKIES.get("access_token")
+
+        # print("Access token présent :", bool(access_token), flush=True)
         
         #On vérifie si le access_token est présent
         if not access_token:

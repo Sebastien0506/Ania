@@ -16,10 +16,10 @@
         </div>
 
         <div class="form">
-            <form>
+            <form (ngSubmit)="sendRequest()">
                 <mat-form-field subscriptSizing="dynamic">
                     <mat-label>Écrire un message</mat-label>
-                    <input type="text" matInput>
+                    <input type="text" matInput [formControl]="messageInput">
                     
                 </mat-form-field>
                 <button mat-raised-button type="submit">

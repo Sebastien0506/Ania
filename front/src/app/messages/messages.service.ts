@@ -9,6 +9,10 @@ export interface Messages {
   content: string;
   author: string;
 }
+
+export interface Response {
+  message: string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -19,5 +23,12 @@ export class MessagesService {
   //On fait la fonction pour récupérer les messages
   getMessage(id: any): Observable<Messages[]>{
     return this.http.get<Messages[]>(`/api/get_message/${id}/`, {withCredentials: true})
-  }
+  };
+
+  sendMessage(data: any): Observable<Response>{
+    return this.http.post<Response>('api/on_message/', data, {
+      withCredentials: true
+    })
+  };
+
 }

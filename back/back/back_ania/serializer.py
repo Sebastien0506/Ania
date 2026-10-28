@@ -1,12 +1,9 @@
 from rest_framework import serializers
-from back.back_ania.models import Message, Channel, DiscordMessage
+from back.back_ania.models import  Channel, DiscordMessage
 import html
 
-class MessageSerializer(serializers.ModelSerializer):
+class MessageSerializer(serializers.Serializer):
 
-    class Meta:
-        model = Message
-        fields = ["content"]
 
     def validate_content(self, value):
         value = value.strip()
