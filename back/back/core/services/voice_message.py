@@ -19,12 +19,14 @@ def generate_audio(message) :
             raise
 
 async def voice_message(bot, user_id, channel_id, message) :
+    print("1. Début de voice_message", flush=True)
     #On récupère les données
     user_id = int(user_id)
     channel_id= int(channel_id)
 
     #On récupère le salon textuel Discord
     channel = bot.get_channel(channel_id)
+    print("2. Récupérer du salon textuel", flush=True)
 
     if channel is None or not isinstance(channel, discord.TextChannel) :
         raise ValueError("Salon textuel introuvable.")
@@ -34,6 +36,8 @@ async def voice_message(bot, user_id, channel_id, message) :
         message,
         allowed_mentions=discord.AllowedMentions.none()
     )
+
+    print("3. Envoi du message sur discord", flush=True)
 
     for guild in bot.guilds :
         member = guild.get_member(user_id)
@@ -45,6 +49,7 @@ async def voice_message(bot, user_id, channel_id, message) :
 
             try :
                 await play_audio(voice_channel, filepath)
+                print("4. Essai de play_audio", flush=True)
 
             finally :
                 os.remove(filepath)
