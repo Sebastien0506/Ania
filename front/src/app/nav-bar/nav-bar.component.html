@@ -12,13 +12,19 @@
             <button mat-button (click)="openDialog()"> Connexion</button>
           </li>
         } @else {
-          <button mat-button [matMenuTriggerFor]="userMenu">Menu</button>
+          <button mat-raised-button [matMenuTriggerFor]="userMenu">Menu</button>
           <mat-menu #userMenu="matMenu">
             @for( channel of channels; track channel.channel_id){
               <button mat-menu-item [routerLink]="['/channel', channel.channel_id]">{{channel.name}}</button>
             }
-            
           </mat-menu>
+          @if (botInVocal()) {
+            <button mat-raised-button (click)="sendRequestDisconnectBotVoice()">Déconnecté le bot</button>
+          }
+          @else {
+              <button mat-raised-button (click)="sendRequestJoinBotVocal()">Ania rejoint la vocal</button>
+             
+          }
         }
         
         

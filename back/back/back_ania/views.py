@@ -21,7 +21,7 @@ from back.back_ania.authentication import CookieJWTAuthentication
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from back.core.check_connected_user import connected_user
-from back.core.services.bot_join_vocal_channel import connect_bot_voice_channel
+from back.core.services.bot_join_vocal_channel import connect_bot_voice_channel, disconnect_bot_voice
 from back.core.get_message import get_channel_message
 import asyncio
 from back.core.bot import bot
@@ -436,8 +436,10 @@ def sync_roles(request):
  #Demande au bot de rejoindre le salon vocal       
 @api_view(["POST"])
 def join_bot(request):
+
+    user = request.user
     #on récupère l'id discord de l'utilisateur
-    discord_id = request.data.get("discord_id")
+    discord_id = user.discord_id
 
     #On vérifie que l'id discord est présent
     if not discord_id :
@@ -476,7 +478,73 @@ def join_bot(request):
         )
     return Response(
         {
-            "success": "Utilisateur connecté à un salon vocal."
+            "success": "Bot connecté avec succès."
         },
         status=status.HTTP_200_OK
+    )
+
+@api_view(["POST"])
+@authentication_classes([CookieJWTAuthentication])
+@permission_classes([IsAuthenticated])
+def disconnect_bot(request) :
+
+    user = request.user
+
+    if not bot.is_ready() :
+        return Response(
+            {
+                "detail" : "Ania n'est pas prête"
+            },
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
+    future = asyncio.run_coroutine_threadsafe(
+        disconnect_bot_voice(bot, user.discord_id),
+        bot.loop
+    )
+
+    try :
+        result = future.result(timeout=10)
+    except TimeoutError:
+        return Response(
+            {"detail" : "Délai de connexion dépassé"},
+            status=status.HTTP_504_GATEWAY_TIMEOUT
+        )
+    
+    except Exception as e :
+        print("Erreur de déconnexion :", e, flush=True)
+        return Response(
+            {"detail" : "Erreur lors de la déconnexion"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+    if not result :
+        return Response(
+            {
+                "detail" : "Impossible dedéconnecter Ania"
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    return Response(
+        {"detail" : "Ania déconnectée avec succès."}, status=status.HTTP_200_OK
+    )
+
+@api_view(["GET"])
+@authentication_classes([CookieJWTAuthentication])
+@permission_classes([IsAuthenticated])
+def bot_voice_status(request) :
+    guild = bot.get_guild(int(settings.BOT_GUILD_ID))
+
+    if guild is None :
+        return Response({"connected" : False})
+    
+    voice_client = guild.voice_client
+
+    return Response(
+        {
+            "connected" : (
+                voice_client is not None and voice_client.is_connected()
+            )
+        }
     )
