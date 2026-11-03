@@ -3,9 +3,11 @@ import { LoginComponent } from './login/login.component';
 import { AuthSuccessComponent } from './auth-success/auth-success.component';
 import { ChannelComponent } from './channel/channel.component';
 import { MessagesComponent } from './messages/messages.component';
+import { HomeComponent } from './home/home.component';
 
 
 export const routes: Routes = [
+    {path: '', component: HomeComponent},
     {path: 'login', component: LoginComponent},
     {path: 'auth/success', component: AuthSuccessComponent},
     {path: 'channel',  component: ChannelComponent},
