@@ -1,0 +1,31 @@
+.page403 {
+    width: 100%;
+    height: calc(100vh - 50px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.card_message {
+    display: flex;
+    flex-direction: column;
+    background-color: #252525;
+    width: 50%;
+    height: 300px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    /* border: 2px solid black; */
+    box-shadow: 2px 2px 2px 2px gray;
+    gap: 10px;
+}
+
+span{ 
+    color: white;
+}
+
+.icon{
+    color: white;
+}
