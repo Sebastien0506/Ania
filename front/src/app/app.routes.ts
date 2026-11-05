@@ -7,6 +7,7 @@ import { HomeComponent } from './home/home.component';
 import { Page403Component } from './page403/page403.component';
 import { Page404Component } from './page404/page404.component';
 import { Page500Component } from './page500/page500.component';
+import { Page401Component } from './page401/page401.component';
 
 
 export const routes: Routes = [
@@ -19,5 +20,6 @@ export const routes: Routes = [
     {path: 'page404', component: Page404Component},
     {path: 'page403', component: Page403Component},
     {path: 'page500', component: Page500Component},
+    {path: 'page401', component: Page401Component},
     {path: '**', component: Page404Component}
 ];

@@ -20,6 +20,10 @@ export interface BotVoiceStatus{
 export interface DisconnectBot{
   detail: string;
 }
+
+export interface DisconnectUser{
+  message : string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -50,5 +54,9 @@ export class NavBarService {
 
   disconnectBotVoice(): Observable<HttpResponse<DisconnectBot>>{
     return this.http.post<DisconnectBot>('/api/disconnect_bot/', null, {observe: 'response', withCredentials: true});
+  }
+
+  disconnectUser(): Observable<HttpResponse<DisconnectUser>> {
+    return this.http.post<DisconnectUser>('/api/logout/', {}, { observe: 'response', withCredentials: true});
   }
 }

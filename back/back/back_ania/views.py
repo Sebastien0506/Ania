@@ -16,7 +16,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from back.back_ania.serializer import MessageSerializer, ChannelSerializer, DiscordMessageSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import AuthenticationFailed, TokenError, InvalidToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from back.back_ania.authentication import CookieJWTAuthentication
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -50,6 +50,22 @@ def discord_login(request) :
     url = "http://discord.com/api/oauth2/authorize?" + urllib.parse.urlencode(params)
     print("Url Discord générée: ", url)
     return redirect(url)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def logout(request) :
+    
+    response = Response(
+        {
+            "message" : "Déconexion réussie"
+        },
+        status=status.HTTP_200_OK
+    )
+
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("refresh_token", path="/")
+
+    return response
 
 def get_token_for_user(user) :
     if not user.is_active:

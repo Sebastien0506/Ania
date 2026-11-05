@@ -1,0 +1,30 @@
+.page401 {
+    width: 100%;
+    height: calc(100vh - 56px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #252525;
+    width: 50%;
+    height: 300px;
+    gap: 10px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 2px 2px grey;
+}
+
+.icon{
+    color: white;
+    font-size: 60px;
+    width: 60px;
+    height: 60px;
+}
+
+span{
+    color: white;
+}

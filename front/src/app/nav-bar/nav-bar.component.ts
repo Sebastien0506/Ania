@@ -7,6 +7,8 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { LoginComponent } from '../login/login.component';
 import { MatMenuModule} from '@angular/material/menu'
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIcon } from '@angular/material/icon';
+
 
 
 @Component({
@@ -18,7 +20,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     NgIf,
     MatButtonModule,
     MatDialogModule,
-    MatMenuModule
+    MatMenuModule,
+    MatIcon
 ],
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.css'
@@ -56,8 +59,8 @@ export class NavBarComponent {
         this.navBarService.isLogged.set(true);
         console.log("Channels:", this.channels);
       },
-      error: () => {
-        this.navBarService.isLogged.set(false);
+      error: (err) => {
+        console.error(err);
       }
     });
   }
@@ -107,14 +110,31 @@ export class NavBarComponent {
         );
       },
       error: (err) => {
+        
+      } 
+    });
+  }
+
+  //On fait la requête pour déconnecter l'utilisateur
+  sendRequestDisconnectUser(){
+    this.navBarService.disconnectUser().subscribe({
+      next: (res) => {
+           if(res.status === 200) {
+              this.navBarService.isLogged.set(false);
+
+              this.matSnackBar.open(res.body?.message ?? "Déconnexion réussi.", "Fermer", {duration: 3000});
+              
+           }
+      },
+      error: (err) => {
         this.matSnackBar.open(
-          err.error?.detail ?? err.error?.error ?? "Erreur de déconnexion",
+          err.error?.message ?? err.error?.error ?? "Erreur de déconnexion",
           "Fermer", 
           {
             duration: 3000
           }
         );
-      } 
-    });
+      }
+    })
   }
 }
