@@ -16,6 +16,7 @@ export const routes: Routes = [
     {path: 'channel',  component: ChannelComponent},
     {path: 'channel/:id', component: ChannelComponent},
     {path: 'messages/:id', component: MessagesComponent},
+    {path: 'page404', component: Page404Component},
     {path: 'page403', component: Page403Component},
     {path: 'page500', component: Page500Component},
     {path: '**', component: Page404Component}

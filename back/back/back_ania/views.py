@@ -311,13 +311,39 @@ def get_channels(request):
 
     if not guild:
         return Response(
-            {"error": "Aucune guild trouvée"}, status=status.HTTP_400_BAD_REQUEST
+            {"error" : "Aucune guild trouvée"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    #Récupère le serveur discord correspondant
+    discord_guild = bot.get_guild(int(guild.guild_id))
+
+    if not discord_guild :
+        return Response(
+            {"error" : "Serveur discord introuvable"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    # Récupère l'utilisateur connecté sur discord
+    member = discord_guild.get_member(int(request.user.discord_id))
+
+    if not member: 
+        return Response(
+            {"error" : "Utilisateur discord introuvable"},
+            status=status.HTTP_404_NOT_FOUND
         )
     
     channels = Channel.objects.filter(guild=guild)
 
-    serializer = ChannelSerializer(channels, many=True)
+    #Garder uniquement les salon accessible à l'utilisateur
+    acesible_channel = [
+        channel for channel in channels
+        if(
+            discord_channel := discord_guild.get_channel(int(channel.channel_id))
+        ) is not None and discord_channel.permissions_for(member).view_channel
+    ]
 
+    serializer = ChannelSerializer(acesible_channel, many=True)
     return Response(serializer.data)
 
 @csrf_exempt
@@ -373,32 +399,73 @@ def sync_message(request) :
         )
     return Response({"status": "Message synchronisés."})
 
-#PERMET DE RÉCUPÉRER LES MESSAGES
+# PERMET DE RÉCUPÉRER LES MESSAGES
 @api_view(["GET"])
-# @permission_classes([IsAuthenticated])
-def get_message(request, channel_id) :
-    #On récupère le channel par son id
-    channel = Channel.objects.filter(channel_id=channel_id).first()
+@permission_classes([IsAuthenticated])
+def get_message(request, channel_id):
 
-    if not channel :
+    guild = Guild.objects.first()
+
+    if not guild:
         return Response(
-            {
-                "error": "Aucun channel trouvé."
-            },
-            status=status.HTTP_400_BAD_REQUEST
+            {"error": "Aucune guild trouvée"},
+            status=status.HTTP_404_NOT_FOUND
         )
-    
+
+    # On récupère le channel par son id
+    channel = Channel.objects.filter(
+        channel_id=channel_id,
+        guild=guild
+    ).first()
+
+    if not channel:
+        return Response(
+            {"error": "Aucun channel trouvé."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    discord_guild = bot.get_guild(int(guild.guild_id))
+
+    if not discord_guild:
+        return Response(
+            {"error": "Serveur Discord introuvable"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    member = discord_guild.get_member(int(request.user.discord_id))
+
+    if not member:
+        return Response(
+            {"error": "Membre Discord introuvable"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    discord_channel = discord_guild.get_channel(int(channel.channel_id))
+
+    if not discord_channel:
+        return Response(
+            {"error": "Salon Discord introuvable"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Vérification des permissions Discord
+    if not discord_channel.permissions_for(member).view_channel:
+        return Response(
+            {"error": "Vous n'avez pas accès à ce salon"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
     future = asyncio.run_coroutine_threadsafe(
         get_channel_message(channel),
         bot.loop
     )
+
     messages = future.result()
 
     return Response(
         messages,
         status=status.HTTP_200_OK
     )
-
 
 #Synchronisation des guilde dans la db
 @api_view(["POST"])
