@@ -19,7 +19,7 @@ export function channelInterceptor(
         catchError(
             (err) => {
                 if(err.status === 404){
-                   router.navigate(['/page404'])
+                   router.navigate(['/page404']);
                 }
 
                 if(err.status === 401){
@@ -33,6 +33,14 @@ export function channelInterceptor(
                         });
                     }
                     router.navigate(['/page401']);
+                }
+
+                if(err.status === 403) {
+                    router.navigate(['/page403']);
+                }
+
+                if(err.status === 500) {
+                    router.navigate(['/page500']);
                 }
                 return throwError(() => err);
             }
