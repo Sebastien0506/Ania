@@ -54,18 +54,28 @@ def discord_login(request) :
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def logout(request) :
-    
+    #On récupère le token depuis les cookies
+    refresh_token = request.COOKIES.get("refresh_token")
+    #Si le token est présent on le blacklist
+    if refresh_token :
+        try :
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except TokenError :
+            pass
+    #On envoi la réponse
     response = Response(
         {
-            "message" : "Déconexion réussie"
+            "message" : "Déconnexion réussie"
         },
         status=status.HTTP_200_OK
     )
-
+    #On supprime les token du navigateur
     response.delete_cookie("access_token", path="/")
     response.delete_cookie("refresh_token", path="/")
 
     return response
+
 
 def get_token_for_user(user) :
     if not user.is_active:
